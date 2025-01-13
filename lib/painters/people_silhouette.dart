@@ -24,7 +24,7 @@ class SilhouetteOverlay extends StatelessWidget {
                     Icons.person,
                     size: MediaQuery.of(context).size.width * 0.4,
                     color: Colors.transparent,
-                    shadows: [],
+                    shadows: const [],
                   ),
                 ),
               ),

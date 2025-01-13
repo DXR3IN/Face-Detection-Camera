@@ -111,7 +111,7 @@ class CameraScreenController extends GetxController {
       final XFile rawImage = await cameraController.takePicture();
 
       if (changeMirrored.value) {
-        _mirroredImage(rawImage);
+        await _mirroredImage(rawImage);
       }
 
       final File file = File(rawImage.path);
@@ -149,7 +149,7 @@ class CameraScreenController extends GetxController {
   }
 
   //code to help if the picture need to be mirrored or not
-  void _mirroredImage(XFile rawImage) async {
+  Future<void> _mirroredImage(XFile rawImage) async {
     img.Image flippedImage = img.decodeJpg(await rawImage.readAsBytes())!;
     flippedImage = img.flipHorizontal(flippedImage);
     await img.encodeJpgFile(rawImage.path, flippedImage);
