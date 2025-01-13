@@ -3,7 +3,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:absence_face_detection/controller/camera_screen_controller.dart';
-// import 'dart:math' as math;
+import 'dart:math' as math;
 
 class CameraScreen extends StatefulWidget {
   @override
@@ -32,8 +32,16 @@ class _CameraScreenState extends State<CameraScreen> {
               height: double.infinity,
               child: Obx(() {
                 if (_controller.isCameraInitialized.value) {
-                  return Center(
-                      child: CameraPreview(_controller.cameraController));
+                  return _controller.isMirroredImage.value
+                      ? Transform(
+                          alignment: Alignment.center,
+                          transform: Matrix4.rotationY(math.pi),
+                          child: Center(
+                              child:
+                                  CameraPreview(_controller.cameraController)),
+                        )
+                      : Center(
+                          child: CameraPreview(_controller.cameraController));
                 } else {
                   return const Center(child: CircularProgressIndicator());
                 }
@@ -127,10 +135,23 @@ class _CameraScreenState extends State<CameraScreen> {
                         ),
 
                         const SizedBox(width: 32),
-                        const SizedBox(
-                          width: 60,
-                          height: 60,
-                        ),
+                        //Button to change the camera view and the image (mirrored or not)
+                        GestureDetector(
+                          onTap: _controller.mirroredImageChanger,
+                          child: Container(
+                            width: width * 0.13,
+                            height: width * 0.13,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white.withOpacity(0.5),
+                            ),
+                            alignment: Alignment.center,
+                            child: const Icon(
+                              Icons.loop,
+                              color: Colors.white,
+                            ),
+                          ),
+                        )
                       ],
                     ),
                   ],

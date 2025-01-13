@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
+import 'package:image/image.dart' as img;
 
 class CameraScreenController extends GetxController {
   late CameraController cameraController;
@@ -14,6 +15,7 @@ class CameraScreenController extends GetxController {
   RxBool isFaceCentered = false.obs;
   final RxBool isCameraInitialized = false.obs;
   late List<Face> totalFaces = [];
+  final RxBool isMirroredImage = true.obs;
 
   // Rx<FlashMode> flashMode = FlashMode.off.obs;
 
@@ -28,21 +30,6 @@ class CameraScreenController extends GetxController {
     cameraController.dispose();
     super.dispose();
   }
-
-  // Future<void> toggleFlashMode() async {
-  //   print("toggle flash mode");
-  //   if (flashMode.value == FlashMode.off) {
-  //     flashMode.value = FlashMode.always;
-  //   } else {
-  //     flashMode.value = FlashMode.off;
-  //   }
-  //   try {
-  //     await cameraController.setFlashMode(flashMode.value);
-  //     print("Flash mode set to: ${flashMode.value}");
-  //   } catch (e) {
-  //     print("Failed to set flash mode: $e");
-  //   }
-  // }
 
   Future<void> _initializeCamera() async {
     final cameras = await availableCameras();
@@ -121,6 +108,11 @@ class CameraScreenController extends GetxController {
 
     try {
       final XFile rawImage = await cameraController.takePicture();
+
+      if (isMirroredImage.value) {
+        _mirroredImage(rawImage);
+      }
+
       final File file = File(rawImage.path);
 
       final isValidFace = await detectFace(file);
@@ -153,5 +145,16 @@ class CameraScreenController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  //code to help if the picture want to be mirrored or not
+  void _mirroredImage(XFile rawImage) async {
+    img.Image flippedImage = img.decodeJpg(await rawImage.readAsBytes())!;
+    flippedImage = img.flipHorizontal(flippedImage);
+    await img.encodeJpgFile(rawImage.path, flippedImage);
+  }
+
+  void mirroredImageChanger() {
+    isMirroredImage.value = !isMirroredImage.value;
   }
 }
