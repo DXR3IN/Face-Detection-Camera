@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class SilhouetteOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Expanded(
+    return Container(
       child: Stack(
         children: [
           // Overlay semi-transparan

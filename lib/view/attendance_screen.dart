@@ -130,6 +130,7 @@ class AttendanceScreen extends StatelessWidget {
   Widget _buildTextField(
       String label, String hint, TextEditingController controller) {
     return TextField(
+      
       controller: controller,
       decoration: InputDecoration(
         labelText: label,

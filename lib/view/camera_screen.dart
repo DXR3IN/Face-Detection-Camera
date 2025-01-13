@@ -1,4 +1,5 @@
 import 'package:absence_face_detection/painters/people_silhouette.dart';
+import 'package:absence_face_detection/widget/animated_rotating_icon_widget.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -32,7 +33,7 @@ class _CameraScreenState extends State<CameraScreen> {
               height: double.infinity,
               child: Obx(() {
                 if (_controller.isCameraInitialized.value) {
-                  return _controller.isMirroredImage.value
+                  return _controller.changeMirrored.value
                       ? Transform(
                           alignment: Alignment.center,
                           transform: Matrix4.rotationY(math.pi),
@@ -136,22 +137,9 @@ class _CameraScreenState extends State<CameraScreen> {
 
                         const SizedBox(width: 32),
                         //Button to change the camera view and the image (mirrored or not)
-                        GestureDetector(
+                        RotatingIconWidget(
                           onTap: _controller.mirroredImageChanger,
-                          child: Container(
-                            width: width * 0.13,
-                            height: width * 0.13,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white.withOpacity(0.5),
-                            ),
-                            alignment: Alignment.center,
-                            child: const Icon(
-                              Icons.loop,
-                              color: Colors.white,
-                            ),
-                          ),
-                        )
+                        ),
                       ],
                     ),
                   ],

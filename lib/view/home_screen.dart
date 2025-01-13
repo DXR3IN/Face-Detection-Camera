@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:absence_face_detection/widget/animated_list_tile_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:absence_face_detection/controller/home_controller.dart';
@@ -11,7 +12,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Home"),
+        title: const Text("Home"),
       ),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -33,17 +34,12 @@ class HomeScreen extends StatelessWidget {
               itemCount: _controller.attendanceList.length,
               itemBuilder: (context, index) {
                 final attendance = _controller.attendanceList[index];
-                return ListTile(
-                  title: Text(attendance.name),
-                  subtitle: Text(
-                      "${attendance.className} - ${attendance.date.toLocal()}"),
-                  leading: CircleAvatar(
-                    backgroundImage: FileImage(File(attendance.imagePath)),
-                  ),
-                  trailing: IconButton(
-                      onPressed: () =>
-                          _controller.deleteAttendanceById(attendance.id!),
-                      icon: const Icon(Icons.delete)),
+                return AnimatedListTile(
+                  title: attendance.name,
+                  subtitle: attendance.className,
+                  imagePath: attendance.imagePath,
+                  onDelete: () =>
+                      _controller.deleteAttendanceById(attendance.id!),
                 );
               },
             );
@@ -52,7 +48,7 @@ class HomeScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _controller.toAttendanceScreen,
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }

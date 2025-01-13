@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:image/image.dart' as img;
+import 'package:flutter/foundation.dart';
 
 class CameraScreenController extends GetxController {
   late CameraController cameraController;
@@ -15,7 +16,7 @@ class CameraScreenController extends GetxController {
   RxBool isFaceCentered = false.obs;
   final RxBool isCameraInitialized = false.obs;
   late List<Face> totalFaces = [];
-  final RxBool isMirroredImage = true.obs;
+  final RxBool changeMirrored = false.obs;
 
   // Rx<FlashMode> flashMode = FlashMode.off.obs;
 
@@ -109,7 +110,7 @@ class CameraScreenController extends GetxController {
     try {
       final XFile rawImage = await cameraController.takePicture();
 
-      if (isMirroredImage.value) {
+      if (changeMirrored.value) {
         _mirroredImage(rawImage);
       }
 
@@ -147,7 +148,7 @@ class CameraScreenController extends GetxController {
     }
   }
 
-  //code to help if the picture want to be mirrored or not
+  //code to help if the picture need to be mirrored or not
   void _mirroredImage(XFile rawImage) async {
     img.Image flippedImage = img.decodeJpg(await rawImage.readAsBytes())!;
     flippedImage = img.flipHorizontal(flippedImage);
@@ -155,6 +156,6 @@ class CameraScreenController extends GetxController {
   }
 
   void mirroredImageChanger() {
-    isMirroredImage.value = !isMirroredImage.value;
+    changeMirrored.value = !changeMirrored.value;
   }
 }
