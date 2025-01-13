@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:absence_face_detection/widget/animated_list_tile_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
