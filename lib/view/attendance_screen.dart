@@ -36,17 +36,70 @@ class AttendanceScreen extends StatelessWidget {
   }
 
   Obx _photoAttendance() {
-    return Obx(() {
-      final imageFile = _controller.imageFile.value;
-      return imageFile != null
-          ? Center(
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  // Image
-                  Container(
+    return Obx(
+      () {
+        final imageFile = _controller.imageFile.value;
+        return imageFile != null
+            ? Center(
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Image
+                    Container(
+                      decoration: const BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(20)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 8,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Image.file(
+                        imageFile,
+                        height: 200,
+                        width: 200,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    // Delete button
+                    Positioned(
+                      top: 5,
+                      right: 5,
+                      child: IconButton(
+                        onPressed: () {
+                          _controller.deleteImage();
+                        },
+                        icon: Container(
+                          width: 50,
+                          height: 50,
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Center(
+                            child: Icon(
+                              Icons.delete,
+                              color: Colors.white,
+                              size: 24,
+                            ),
+                          ),
+                        ),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            : Center(
+                child: GestureDetector(
+                  onTap: _controller.toCamera,
+                  child: Container(
                     decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
+                      borderRadius: BorderRadius.all(Radius.circular(20)),
+                      color: Colors.grey,
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black26,
@@ -55,82 +108,24 @@ class AttendanceScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: ClipOval(
-                      child: Image.file(
-                        imageFile,
-                        height: 200,
-                        width: 200,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                  // Delete button
-                  Positioned(
-                    top: 5,
-                    right: 5,
-                    child: IconButton(
-                      onPressed: () {
-                        _controller.deleteImage();
-                      },
-                      icon: Container(
-                        width: 50,
-                        height: 50,
-                        decoration: const BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Center(
-                          child: Icon(
-                            Icons.delete,
-                            color: Colors.white,
-                            size: 24,
-                          ),
-                        ),
-                      ),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
-                  ),
-                ],
-              ),
-            )
-          : Center(
-              child: GestureDetector(
-                onTap: _controller.toCamera,
-                child: Container(
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 8,
-                        offset: Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: ClipOval(
-                    child: Container(
-                      width: 200,
-                      height: 200,
-                      color: Colors.grey,
-                      child: const Center(
-                        child: Icon(
-                          Icons.camera_alt,
-                          size: 50,
-                        ),
+                    width: 200,
+                    height: 200,
+                    child: const Center(
+                      child: Icon(
+                        Icons.camera_alt,
+                        size: 50,
                       ),
                     ),
                   ),
                 ),
-              ),
-            );
-    });
+              );
+      },
+    );
   }
 
   Widget _buildTextField(
       String label, String hint, TextEditingController controller) {
     return TextField(
-      
       controller: controller,
       decoration: InputDecoration(
         labelText: label,

@@ -1,4 +1,4 @@
-import 'package:absence_face_detection/painters/people_silhouette.dart';
+import 'package:absence_face_detection/painters/block_painter.dart';
 import 'package:absence_face_detection/widget/animated_rotating_icon_widget.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +21,12 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   @override
+  void dispose() {
+    _controller.stopFaceDetection();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
@@ -38,17 +44,66 @@ class _CameraScreenState extends State<CameraScreen> {
                           alignment: Alignment.center,
                           transform: Matrix4.rotationY(math.pi),
                           child: Center(
-                              child:
-                                  CameraPreview(_controller.cameraController)),
+                            child: Obx(
+                              () => Stack(
+                                children: [
+                                  CameraPreview(
+                                    _controller.cameraController,
+                                    child: _controller.customPaint.value,
+                                  ),
+                                  for (var face in _controller.realTimeFaces)
+                                    Positioned(
+                                      left: face.boundingBox.left,
+                                      top: face.boundingBox.top,
+                                      child: Container(
+                                        width: face.boundingBox.width,
+                                        height: face.boundingBox.height,
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                            color: Colors.transparent,
+                                            width: 2,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
                         )
                       : Center(
-                          child: CameraPreview(_controller.cameraController));
+                          child: Obx(
+                            () => Stack(
+                              children: [
+                                CameraPreview(
+                                  _controller.cameraController,
+                                  child: _controller.customPaint.value,
+                                ),
+                                for (var face in _controller.realTimeFaces)
+                                  Positioned(
+                                    left: face.boundingBox.left,
+                                    top: face.boundingBox.top,
+                                    child: Container(
+                                      width: face.boundingBox.width,
+                                      height: face.boundingBox.height,
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color: Colors.transparent,
+                                          width: 2,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        );
                 } else {
                   return const Center(child: CircularProgressIndicator());
                 }
               }),
             ),
-            SilhouetteOverlay(),
+            BlockPainter(),
             Positioned(
               top: MediaQuery.of(context).padding.top + 35,
               left: 10,
@@ -94,9 +149,8 @@ class _CameraScreenState extends State<CameraScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        const SizedBox(
-                          width: 60,
-                          height: 60,
+                        RotatingIconWidget(
+                          onTap: _controller.toggleRealTime,
                         ),
                         const SizedBox(width: 32),
 

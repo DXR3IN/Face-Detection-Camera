@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class SilhouetteOverlay extends StatelessWidget {
+class BlockPainter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -14,7 +14,7 @@ class SilhouetteOverlay extends StatelessWidget {
           ),
           // Kotak transparan di tengah
           Center(
-            child: Container(
+            child: SizedBox(
               width: MediaQuery.of(context).size.width * 0.6,
               height: MediaQuery.of(context).size.width * 0.6,
               child: CustomPaint(

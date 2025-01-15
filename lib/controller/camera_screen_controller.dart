@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'package:absence_face_detection/painters/face_detection_painter.dart';
 import 'package:camera/camera.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -9,49 +11,117 @@ import 'package:image/image.dart' as img;
 class CameraScreenController extends GetxController {
   late CameraController cameraController;
 
+  var _cameraLensDirection = CameraLensDirection.front;
   final Rx<File?> imageFile = Rx<File?>(null);
   final RxString message = "Positioned your face on the block.".obs;
+
+  final RxBool doItRealTime = true.obs;
   final RxBool isLoading = false.obs;
   RxBool isFaceCentered = false.obs;
   final RxBool isCameraInitialized = false.obs;
-  late List<Face> totalFaces = [];
   final RxBool changeMirrored = false.obs;
+
+  List<Face> totalFaces = [];
+  final RxList<Face> realTimeFaces = <Face>[].obs;
+
+  late Rx<CustomPaint> customPaint;
+  String? _text;
+
+  final faceDetector = FaceDetector(
+    options: FaceDetectorOptions(enableLandmarks: true, enableContours: true),
+  );
 
   // Rx<FlashMode> flashMode = FlashMode.off.obs;
 
   @override
   void onInit() {
     _initializeCamera();
+    customPaint = CustomPaint().obs;
     super.onInit();
   }
 
-  @override
-  void dispose() {
-    cameraController.dispose();
-    super.dispose();
+  Future stopFaceDetection() async {
+    await cameraController.stopImageStream();
+    await cameraController.dispose();
   }
 
   Future<void> _initializeCamera() async {
     final cameras = await availableCameras();
-    final frontCamera = cameras.firstWhere(
-      (camera) => camera.lensDirection == CameraLensDirection.front,
-    );
+    final frontCamera = cameras[1];
 
     cameraController = CameraController(
       frontCamera,
+      enableAudio: false,
       ResolutionPreset.high,
+      imageFormatGroup: Platform.isAndroid
+          ? ImageFormatGroup.nv21
+          : ImageFormatGroup.bgra8888,
     );
 
     await cameraController.initialize();
     isCameraInitialized.value = true;
+
+    if (doItRealTime.value) _startRealTimeFaceDetection(cameraController);
+  }
+
+  void toggleRealTime() {
+    doItRealTime.value = !doItRealTime.value;
+  }
+
+  void _startRealTimeFaceDetection(CameraController cameraController) {
+    if (cameraController.value.isStreamingImages) return;
+    int frameCount = 0;
+    cameraController.startImageStream((image) async {
+      frameCount++;
+      try {
+        if (frameCount % 5 == 0) {
+          final inputImage = InputImage.fromBytes(
+            bytes: concatenatePlanes(image),
+            metadata: InputImageMetadata(
+              size: Size(image.width.toDouble(), image.height.toDouble()),
+              rotation: InputImageRotationValue.fromRawValue(
+                    cameraController.description.sensorOrientation,
+                  ) ??
+                  InputImageRotation.rotation0deg,
+              format: Platform.isAndroid
+                  ? InputImageFormat.nv21
+                  : InputImageFormat.bgra8888,
+              bytesPerRow: image.planes[1].bytesPerRow,
+            ),
+          );
+
+          final faces = await faceDetector.processImage(inputImage);
+
+          if (inputImage.metadata?.size != null &&
+              inputImage.metadata?.rotation != null) {
+            final painter = FaceDetectorPainter(
+              faces,
+              inputImage.metadata!.size,
+              inputImage.metadata!.rotation,
+              _cameraLensDirection,
+            );
+            customPaint.value = CustomPaint(painter: painter);
+          } else {
+            String text = 'Faces found: ${faces.length}\n\n';
+            for (final face in faces) {
+              text += 'face: ${face.boundingBox}\n\n';
+            }
+            _text = text;
+            customPaint.value = const CustomPaint();
+          }
+          realTimeFaces.assignAll(faces);
+          print('Faces found: ${faces.length}');
+        }
+      } catch (e) {
+        throw ('Error detecting faces in real-time: $e');
+      }
+    });
   }
 
   bool _isFaceCentered(Face face, int imageWidth, int imageHeight) {
-    // Define the center region as a percentage of the image dimensions
     const double centerRegionWidthPercentage = 0.1;
     const double centerRegionHeightPercentage = 0.1;
 
-    // Calculate the center region boundaries
     final double centerX = imageWidth / 2;
     final double centerY = imageHeight / 2;
     final double centerRegionWidth = imageWidth * centerRegionWidthPercentage;
@@ -63,10 +133,8 @@ class CameraScreenController extends GetxController {
     final double topBoundary = centerY - (centerRegionHeight / 2);
     final double bottomBoundary = centerY + (centerRegionHeight / 2);
 
-    // Get the face's bounding box
     final Rect boundingBox = face.boundingBox;
 
-    // Check if the face's bounding box is within the center region
     final double faceCenterX = (boundingBox.left + boundingBox.right) / 2;
     final double faceCenterY = (boundingBox.top + boundingBox.bottom) / 2;
 
@@ -77,13 +145,6 @@ class CameraScreenController extends GetxController {
   }
 
   Future<bool> detectFace(File imageFile) async {
-    final faceDetector = FaceDetector(
-      options: FaceDetectorOptions(
-        enableClassification: true,
-        performanceMode: FaceDetectorMode.fast,
-      ),
-    );
-
     final inputImage = InputImage.fromFilePath(imageFile.path);
     final List<Face> faces = await faceDetector.processImage(inputImage);
 
@@ -149,12 +210,27 @@ class CameraScreenController extends GetxController {
 
   //code to help if the picture need to be mirrored or not
   Future<void> _mirroredImage(XFile rawImage) async {
-    img.Image flippedImage = img.decodeJpg(await rawImage.readAsBytes())!;
-    flippedImage = img.flipHorizontal(flippedImage);
-    await img.encodeJpgFile(rawImage.path, flippedImage);
+    final bytes = await rawImage.readAsBytes();
+    final img.Image? originalImage = img.decodeImage(bytes);
+    if (originalImage != null) {
+      final img.Image flippedImage = img.flipHorizontal(originalImage);
+      final File output = File(rawImage.path);
+      await output.writeAsBytes(img.encodeJpg(flippedImage));
+    } else {
+      throw Exception("Error decoding image.");
+    }
   }
 
   void mirroredImageChanger() {
     changeMirrored.value = !changeMirrored.value;
+  }
+
+  //function area to hel Real Time Face Detection
+  Uint8List concatenatePlanes(CameraImage image) {
+    final WriteBuffer allBytes = WriteBuffer();
+    for (final Plane plane in image.planes) {
+      allBytes.putUint8List(plane.bytes);
+    }
+    return allBytes.done().buffer.asUint8List();
   }
 }
