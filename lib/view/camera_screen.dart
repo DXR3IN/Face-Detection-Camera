@@ -45,57 +45,67 @@ class _CameraScreenState extends State<CameraScreen> {
                           transform: Matrix4.rotationY(math.pi),
                           child: Center(
                             child: Obx(
-                              () => Stack(
-                                children: [
-                                  CameraPreview(
-                                    _controller.cameraController,
-                                    child: _controller.customPaint.value,
-                                  ),
-                                  for (var face in _controller.realTimeFaces)
-                                    Positioned(
-                                      left: face.boundingBox.left,
-                                      top: face.boundingBox.top,
-                                      child: Container(
-                                        width: face.boundingBox.width,
-                                        height: face.boundingBox.height,
-                                        decoration: BoxDecoration(
-                                          border: Border.all(
-                                            color: Colors.transparent,
-                                            width: 2,
-                                          ),
+                              () => _controller.doItRealTime.value
+                                  ? Stack(
+                                      children: [
+                                        CameraPreview(
+                                          _controller.cameraController,
+                                          child: _controller.customPaint.value,
                                         ),
-                                      ),
+                                        for (var face
+                                            in _controller.realTimeFaces)
+                                          Positioned(
+                                            left: face.boundingBox.left,
+                                            top: face.boundingBox.top,
+                                            child: Container(
+                                              width: face.boundingBox.width,
+                                              height: face.boundingBox.height,
+                                              decoration: BoxDecoration(
+                                                border: Border.all(
+                                                  color: Colors.transparent,
+                                                  width: 2,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    )
+                                  : CameraPreview(
+                                      _controller.cameraController,
                                     ),
-                                ],
-                              ),
                             ),
                           ),
                         )
                       : Center(
                           child: Obx(
-                            () => Stack(
-                              children: [
-                                CameraPreview(
-                                  _controller.cameraController,
-                                  child: _controller.customPaint.value,
-                                ),
-                                for (var face in _controller.realTimeFaces)
-                                  Positioned(
-                                    left: face.boundingBox.left,
-                                    top: face.boundingBox.top,
-                                    child: Container(
-                                      width: face.boundingBox.width,
-                                      height: face.boundingBox.height,
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                          color: Colors.transparent,
-                                          width: 2,
-                                        ),
+                            () => _controller.doItRealTime.value
+                                ? Stack(
+                                    children: [
+                                      CameraPreview(
+                                        _controller.cameraController,
+                                        child: _controller.customPaint.value,
                                       ),
-                                    ),
+                                      for (var face
+                                          in _controller.realTimeFaces)
+                                        Positioned(
+                                          left: face.boundingBox.left,
+                                          top: face.boundingBox.top,
+                                          child: Container(
+                                            width: face.boundingBox.width,
+                                            height: face.boundingBox.height,
+                                            decoration: BoxDecoration(
+                                              border: Border.all(
+                                                color: Colors.transparent,
+                                                width: 2,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  )
+                                : CameraPreview(
+                                    _controller.cameraController,
                                   ),
-                              ],
-                            ),
                           ),
                         );
                 } else {
@@ -105,20 +115,46 @@ class _CameraScreenState extends State<CameraScreen> {
             ),
             BlockPainter(),
             Positioned(
-              top: MediaQuery.of(context).padding.top + 35,
-              left: 10,
-              child: GestureDetector(
-                onTap: Get.back,
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.5),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(
-                    Icons.arrow_back,
-                    color: Colors.white,
-                  ),
+              top: 0,
+              left: 0,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                ),
+                height: MediaQuery.of(context).padding.top + height * 0.1,
+                width: width,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    GestureDetector(
+                      onTap: Get.back,
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.5),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(
+                          Icons.arrow_back,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    // const SizedBox(width: 50),
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.5),
+                      ),
+                      child: Text("Face Tracking"),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.transparent,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -150,6 +186,7 @@ class _CameraScreenState extends State<CameraScreen> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         RotatingIconWidget(
+                          icon: Icons.camera,
                           onTap: _controller.toggleRealTime,
                         ),
                         const SizedBox(width: 32),

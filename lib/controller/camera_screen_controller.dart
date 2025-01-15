@@ -11,11 +11,11 @@ import 'package:image/image.dart' as img;
 class CameraScreenController extends GetxController {
   late CameraController cameraController;
 
-  var _cameraLensDirection = CameraLensDirection.front;
+  final _cameraLensDirection = CameraLensDirection.front;
   final Rx<File?> imageFile = Rx<File?>(null);
   final RxString message = "Positioned your face on the block.".obs;
 
-  final RxBool doItRealTime = true.obs;
+  final RxBool doItRealTime = false.obs;
   final RxBool isLoading = false.obs;
   RxBool isFaceCentered = false.obs;
   final RxBool isCameraInitialized = false.obs;
@@ -31,12 +31,10 @@ class CameraScreenController extends GetxController {
     options: FaceDetectorOptions(enableLandmarks: true, enableContours: true),
   );
 
-  // Rx<FlashMode> flashMode = FlashMode.off.obs;
-
   @override
   void onInit() {
     _initializeCamera();
-    customPaint = CustomPaint().obs;
+    customPaint = const CustomPaint().obs;
     super.onInit();
   }
 
@@ -66,6 +64,7 @@ class CameraScreenController extends GetxController {
 
   void toggleRealTime() {
     doItRealTime.value = !doItRealTime.value;
+    _initializeCamera();
   }
 
   void _startRealTimeFaceDetection(CameraController cameraController) {
@@ -110,38 +109,12 @@ class CameraScreenController extends GetxController {
             customPaint.value = const CustomPaint();
           }
           realTimeFaces.assignAll(faces);
-          print('Faces found: ${faces.length}');
+          // print('Faces found: ${faces.length}');
         }
       } catch (e) {
         throw ('Error detecting faces in real-time: $e');
       }
     });
-  }
-
-  bool _isFaceCentered(Face face, int imageWidth, int imageHeight) {
-    const double centerRegionWidthPercentage = 0.1;
-    const double centerRegionHeightPercentage = 0.1;
-
-    final double centerX = imageWidth / 2;
-    final double centerY = imageHeight / 2;
-    final double centerRegionWidth = imageWidth * centerRegionWidthPercentage;
-    final double centerRegionHeight =
-        imageHeight * centerRegionHeightPercentage;
-
-    final double leftBoundary = centerX - (centerRegionWidth / 2);
-    final double rightBoundary = centerX + (centerRegionWidth / 2);
-    final double topBoundary = centerY - (centerRegionHeight / 2);
-    final double bottomBoundary = centerY + (centerRegionHeight / 2);
-
-    final Rect boundingBox = face.boundingBox;
-
-    final double faceCenterX = (boundingBox.left + boundingBox.right) / 2;
-    final double faceCenterY = (boundingBox.top + boundingBox.bottom) / 2;
-
-    return faceCenterX >= leftBoundary &&
-        faceCenterX <= rightBoundary &&
-        faceCenterY >= topBoundary &&
-        faceCenterY <= bottomBoundary;
   }
 
   Future<bool> detectFace(File imageFile) async {
@@ -225,12 +198,38 @@ class CameraScreenController extends GetxController {
     changeMirrored.value = !changeMirrored.value;
   }
 
-  //function area to hel Real Time Face Detection
+  //function to help increase performance Real Time Face Detection
   Uint8List concatenatePlanes(CameraImage image) {
     final WriteBuffer allBytes = WriteBuffer();
     for (final Plane plane in image.planes) {
       allBytes.putUint8List(plane.bytes);
     }
     return allBytes.done().buffer.asUint8List();
+  }
+
+  bool _isFaceCentered(Face face, int imageWidth, int imageHeight) {
+    const double centerRegionWidthPercentage = 0.1;
+    const double centerRegionHeightPercentage = 0.1;
+
+    final double centerX = imageWidth / 2;
+    final double centerY = imageHeight / 2;
+    final double centerRegionWidth = imageWidth * centerRegionWidthPercentage;
+    final double centerRegionHeight =
+        imageHeight * centerRegionHeightPercentage;
+
+    final double leftBoundary = centerX - (centerRegionWidth / 2);
+    final double rightBoundary = centerX + (centerRegionWidth / 2);
+    final double topBoundary = centerY - (centerRegionHeight / 2);
+    final double bottomBoundary = centerY + (centerRegionHeight / 2);
+
+    final Rect boundingBox = face.boundingBox;
+
+    final double faceCenterX = (boundingBox.left + boundingBox.right) / 2;
+    final double faceCenterY = (boundingBox.top + boundingBox.bottom) / 2;
+
+    return faceCenterX >= leftBoundary &&
+        faceCenterX <= rightBoundary &&
+        faceCenterY >= topBoundary &&
+        faceCenterY <= bottomBoundary;
   }
 }

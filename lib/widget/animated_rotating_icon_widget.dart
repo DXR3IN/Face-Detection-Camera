@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 
 class RotatingIconWidget extends StatefulWidget {
   final VoidCallback onTap;
+  final IconData? icon;
 
-  const RotatingIconWidget({Key? key, required this.onTap}) : super(key: key);
+  const RotatingIconWidget(
+      {Key? key, required this.onTap, this.icon = Icons.loop})
+      : super(key: key);
 
   @override
   _RotatingIconWidgetState createState() => _RotatingIconWidgetState();
@@ -56,8 +59,8 @@ class _RotatingIconWidgetState extends State<RotatingIconWidget>
               child: child,
             );
           },
-          child: const Icon(
-            Icons.loop,
+          child: Icon(
+            widget.icon ?? Icons.loop,
             color: Colors.white,
           ),
         ),

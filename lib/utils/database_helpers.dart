@@ -14,7 +14,6 @@ class DatabaseHelper {
   static const columnClassName = 'className';
   static const columnDate = 'date';
 
-  // Singleton pattern
   DatabaseHelper._privateConstructor();
   static final DatabaseHelper instance = DatabaseHelper._privateConstructor();
   static Database? _database;
