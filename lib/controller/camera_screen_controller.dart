@@ -63,6 +63,8 @@ class CameraScreenController extends GetxController {
   }
 
   void toggleRealTime() {
+    isCameraInitialized.value = false;
+    cameraController.dispose();
     doItRealTime.value = !doItRealTime.value;
     _initializeCamera();
   }

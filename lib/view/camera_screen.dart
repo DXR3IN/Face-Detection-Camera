@@ -30,6 +30,7 @@ class _CameraScreenState extends State<CameraScreen> {
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
+    final paddingTop = MediaQuery.of(context).padding.top;
     return Scaffold(
       body: Container(
         color: Colors.black,
@@ -118,13 +119,13 @@ class _CameraScreenState extends State<CameraScreen> {
               top: 0,
               left: 0,
               child: Container(
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: Colors.black,
                 ),
-                height: MediaQuery.of(context).padding.top + height * 0.1,
+                height: paddingTop + height * 0.1,
                 width: width,
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     GestureDetector(
                       onTap: Get.back,
@@ -140,17 +141,40 @@ class _CameraScreenState extends State<CameraScreen> {
                         ),
                       ),
                     ),
-                    // const SizedBox(width: 50),
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.5),
-                      ),
-                      child: Text("Face Tracking"),
+                    Obx(
+                      () => RichText(
+                          text: TextSpan(
+                        children: [
+                          const TextSpan(
+                            text: 'Face Tracking',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                            ),
+                          ),
+                          const TextSpan(
+                            text: ' : ',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                            ),
+                          ),
+                          TextSpan(
+                            text: _controller.doItRealTime.value ? 'ON' : 'OFF',
+                            style: TextStyle(
+                              color: _controller.doItRealTime.value
+                                  ? Colors.blue
+                                  : Colors.red,
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      )),
                     ),
                     Container(
                       padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         color: Colors.transparent,
                       ),
                     ),

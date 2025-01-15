@@ -25,13 +25,13 @@ class AttendanceScreen extends StatelessWidget {
                 const SizedBox(height: 30),
                 _buildTextField(
                     "Class", "Enter your class", _controller.classController),
-                const SizedBox(height: 30),
-                _buildButton()
               ],
             ),
           ),
         ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: _buildButton(),
     );
   }
 
